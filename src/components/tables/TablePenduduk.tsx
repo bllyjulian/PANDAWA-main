@@ -5,7 +5,6 @@ import { useModal } from "../../hooks/useModal";
 import { Modal } from "../ui/modal";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
-import Link from 'next/link';
 import Image from 'next/image';
 
 import {
@@ -30,20 +29,31 @@ interface Penduduk {
 }
 
 export default function TablePenduduk() {
+  // State definitions
   const [data, setData] = useState<Penduduk[]>([]);
+  const [filteredData, setFilteredData] = useState<Penduduk[]>([]);
+  const [kecamatanOptions, setKecamatanOptions] = useState<{value: string, label: string}[]>([]);
+  const [tahunOptions, setTahunOptions] = useState<{value: string, label: string}[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
   const [selectedPenduduk, setSelectedPenduduk] = useState<Penduduk | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState("");
+  const [filters, setFilters] = useState({
+    kecamatan: '',
+    tahun: ''
+  });
   const { isOpen, openModal, closeModal } = useModal();
   
-  const totalPages = Math.ceil(data.length / itemsPerPage);
+  const itemsPerPage = 5;
+  
+  // Calculate pagination values
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
 
+  // Fetch penduduk data
   const fetchData = async () => {
     setIsLoading(true);
     setError(null);
@@ -58,6 +68,28 @@ export default function TablePenduduk() {
       
       if (Array.isArray(result)) {
         setData(result);
+        setFilteredData(result);
+        
+        // Generate kecamatan options for filter dropdown
+        const uniqueKecamatan = Array.from(new Set(result.map((item: Penduduk) => item.nama_kecamatan)))
+          .map(kecamatan => ({
+            value: kecamatan as string,
+            label: kecamatan as string
+          }));
+
+          
+        
+        setKecamatanOptions([{ value: '', label: 'Semua Kecamatan' }, ...uniqueKecamatan]);
+        
+        // Generate tahun options for filter dropdown
+        const uniqueTahun = Array.from(new Set(result.map((item: Penduduk) => item.tahun)))
+          .map(tahun => ({
+            value: String(tahun),
+            label: String(tahun)
+          }))
+          .sort((a, b) => parseInt(b.value) - parseInt(a.value)); // Sort by year descending
+        
+        setTahunOptions([{ value: '', label: 'Semua Tahun' }, ...uniqueTahun]);
       } else {
         console.error('Expected array but got:', result);
         setError('Format data tidak sesuai');
@@ -70,32 +102,47 @@ export default function TablePenduduk() {
     }
   };
 
+  // Initial data fetch
   useEffect(() => {
     fetchData();
   }, []);
 
+  // Apply filters when filter state changes
+  useEffect(() => {
+    applyFilters();
+  }, [filters, data]);
+
+  // Filter function
+  const applyFilters = () => {
+    let result = [...data];
+    
+    if (filters.kecamatan) {
+      result = result.filter(item => item.nama_kecamatan === filters.kecamatan);
+    }
+    
+    if (filters.tahun) {
+      result = result.filter(item => String(item.tahun) === filters.tahun);
+    }
+    
+    setFilteredData(result);
+    setCurrentPage(1); // Reset to first page when filters change
+  };
+
+  // Handle page change
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
   };
 
-  // These should be dynamically populated from the backend in a real application
-  const optionsKecamatan = [
-    { value: 'kecamatan1', label: 'Kecamatan 1' },
-    { value: 'kecamatan2', label: 'Kecamatan 2' },
-    { value: 'kecamatan3', label: 'Kecamatan 3' },
-  ];
-
-  const optionsTahun = [
-    { value: '2022', label: '2022' },
-    { value: '2023', label: '2023' },
-    { value: '2024', label: '2024' },
-  ];
-
-  const handleSelectChange = (value: string) => {
-    console.log('Selected:', value);
-    // Implement filtering logic here
+  // Handle filter changes
+  const handleKecamatanFilterChange = (value: string) => {
+    setFilters(prev => ({ ...prev, kecamatan: value }));
+  };
+  
+  const handleTahunFilterChange = (value: string) => {
+    setFilters(prev => ({ ...prev, tahun: value }));
   };
 
+  // Handle edit button click
   const handleEdit = (id: number) => {
     const selected = data.find(item => item.id_penduduk === id);
     if (selected) {
@@ -104,15 +151,17 @@ export default function TablePenduduk() {
     }
   };
   
+  // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, field: keyof Penduduk) => {
     if (selectedPenduduk) {
       setSelectedPenduduk({
         ...selectedPenduduk,
-        [field]: e.target.value
+        [field]: field === 'tahun' ? parseInt(e.target.value) : e.target.value
       });
     }
   };
   
+  // Handle save button click
   const handleSave = async () => {
     if (!selectedPenduduk) return;
     
@@ -175,9 +224,9 @@ export default function TablePenduduk() {
           <div className="flex justify-end gap-2 w-full sm:w-auto">
             <div className="relative">
               <Select
-                options={optionsKecamatan}
+                options={kecamatanOptions}
                 placeholder="Kecamatan"
-                onChange={handleSelectChange}
+                onChange={handleKecamatanFilterChange}
                 className="dark:bg-dark-900"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none">
@@ -186,16 +235,15 @@ export default function TablePenduduk() {
             </div>
             <div className="relative">
               <Select
-                options={optionsTahun}
+                options={tahunOptions}
                 placeholder="Tahun"
-                onChange={handleSelectChange}
+                onChange={handleTahunFilterChange}
                 className="dark:bg-dark-900"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none">
                 <Image src="/icons/chevron-down.svg" width={20} height={20} alt="Chevron Down" />
               </span>
             </div>
-  
           </div>
         </div>
         
@@ -240,7 +288,7 @@ export default function TablePenduduk() {
               ) : currentItems.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="px-5 py-3 text-center text-theme-sm text-gray-500 dark:text-gray-400">
-                    Tidak ada data
+                    Tidak ada data yang sesuai dengan filter
                   </TableCell>
                 </TableRow>
               ) : (
@@ -314,7 +362,7 @@ export default function TablePenduduk() {
                       type="text"
                       value={selectedPenduduk?.nama_kecamatan || ''}
                       onChange={(e) => handleInputChange(e, 'nama_kecamatan')}
-                      disabled={isLoading}
+                      disabled={true} // Make kecamatan name read-only as it's just a reference
                     />
                   </div>
 
