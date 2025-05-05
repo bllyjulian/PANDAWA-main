@@ -6,7 +6,6 @@ import { Modal } from "../ui/modal";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
 import TextArea from "@/components/form/input/TextArea";
-import Link from 'next/link';
 import Image from 'next/image';
 
 import {
@@ -27,60 +26,129 @@ interface Kecamatan {
   nama_kecamatan: string;
   deskripsi: string;
   area: string;
+  posisi_x?: string;
+  posisi_y?: string;
+  gambar?: string;
+  nama_komoditas: string;
+  id_komoditas?: number;
+}
+
+interface Komoditas {
   id_komoditas: number;
+  nama_komoditas: string;
 }
 
 export default function TableKecamatan() {
+  // State definitions
   const [data, setData] = useState<Kecamatan[]>([]);
+  const [filteredData, setFilteredData] = useState<Kecamatan[]>([]);
+  const [kecamatanOptions, setKecamatanOptions] = useState<{value: string, label: string}[]>([]);
+  const [komoditasOptions, setKomoditasOptions] = useState<{value: string, label: string}[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
   const [selectedKecamatan, setSelectedKecamatan] = useState<Kecamatan | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [filters, setFilters] = useState({
+    kecamatan: '',
+    komoditas: ''
+  });
   const { isOpen, openModal, closeModal } = useModal();
   
-  const totalPages = Math.ceil(data.length / itemsPerPage);
+  const itemsPerPage = 5;
+  
+  // Calculate pagination values
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
 
-  const fetchData = async () => {
+  // Fetch kecamatan data
+  const fetchKecamatanData = async () => {
     setIsLoading(true);
     try {
       const res = await fetch('/api/kecamatan');
       const result = await res.json();
       setData(result);
+      setFilteredData(result);
+      
+      // Generate kecamatan options for filter dropdown
+      const uniqueKecamatan = Array.from(new Set(result.map((item: Kecamatan) => item.nama_kecamatan)))
+        .map(kecamatan => ({
+          value: kecamatan as string,
+          label: kecamatan as string
+        }));
+      
+      setKecamatanOptions([{ value: '', label: 'Semua Kecamatan' }, ...uniqueKecamatan]);
     } catch (error) {
-      console.error('Gagal mengambil data:', error);
+      console.error('Gagal mengambil data kecamatan:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Fetch komoditas data
+  const fetchKomoditasData = async () => {
+    try {
+      const res = await fetch('/api/komoditas');
+      const result = await res.json();
+      
+      // Generate komoditas options for filter dropdown
+      const komoditasOptions = [
+        { value: '', label: 'Semua Komoditas' },
+        ...result.map((item: Komoditas) => ({
+          value: item.nama_komoditas,
+          label: item.nama_komoditas
+        }))
+      ];
+      
+      setKomoditasOptions(komoditasOptions);
+    } catch (error) {
+      console.error('Gagal mengambil data komoditas:', error);
+    }
+  };
+
+  // Initial data fetch
   useEffect(() => {
-    fetchData();
+    fetchKecamatanData();
+    fetchKomoditasData();
   }, []);
 
+  // Apply filters when filter state changes
+  useEffect(() => {
+    applyFilters();
+  }, [filters, data]);
+
+  // Filter function
+  const applyFilters = () => {
+    let result = [...data];
+    
+    if (filters.kecamatan) {
+      result = result.filter(item => item.nama_kecamatan === filters.kecamatan);
+    }
+    
+    if (filters.komoditas) {
+      result = result.filter(item => item.nama_komoditas === filters.komoditas);
+    }
+    
+    setFilteredData(result);
+    setCurrentPage(1); // Reset to first page when filters change
+  };
+
+  // Handle page change
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
   };
 
-  const optionsKecamatan = [
-    { value: 'marketing', label: 'Marketing' },
-    { value: 'template', label: 'Template' },
-    { value: 'development', label: 'Development' },
-  ];
-
-  const optionsCommodity = [
-    { value: 'marketing', label: 'Marketing' },
-    { value: 'template', label: 'Template' },
-    { value: 'development', label: 'Development' },
-  ];
-
-  const handleSelectChange = (value: string) => {
-    console.log('Selected:', value);
+  // Handle filter changes
+  const handleKecamatanFilterChange = (value: string) => {
+    setFilters(prev => ({ ...prev, kecamatan: value }));
+  };
+  
+  const handleKomoditasFilterChange = (value: string) => {
+    setFilters(prev => ({ ...prev, komoditas: value }));
   };
 
+  // Handle edit button click
   const handleEdit = (id: number) => {
     const selected = data.find(item => item.id_kecamatan === id);
     if (selected) {
@@ -89,6 +157,7 @@ export default function TableKecamatan() {
     }
   };
   
+  // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, field: keyof Kecamatan) => {
     if (selectedKecamatan) {
       setSelectedKecamatan({
@@ -98,6 +167,7 @@ export default function TableKecamatan() {
     }
   };
   
+  // Handle save button click
   const handleSave = async () => {
     if (!selectedKecamatan) return;
     
@@ -135,7 +205,7 @@ export default function TableKecamatan() {
         closeModal();
         
         // Optional: Refresh data from server to ensure consistency
-        await fetchData();
+        await fetchKecamatanData();
       } else {
         const errorData = await res.json();
         setMessage(`Gagal update: ${errorData.error || 'Unknown error'}`);
@@ -158,9 +228,9 @@ export default function TableKecamatan() {
           <div className="flex justify-end gap-2 w-full sm:w-130">
             <div className="relative">
               <Select
-                options={optionsKecamatan}
+                options={kecamatanOptions}
                 placeholder="Kecamatan"
-                onChange={handleSelectChange}
+                onChange={handleKecamatanFilterChange}
                 className="dark:bg-dark-900"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none">
@@ -169,9 +239,9 @@ export default function TableKecamatan() {
             </div>
             <div className="relative">
               <Select
-                options={optionsCommodity}
-                placeholder="Commodity"
-                onChange={handleSelectChange}
+                options={komoditasOptions}
+                placeholder="Komoditas"
+                onChange={handleKomoditasFilterChange}
                 className="dark:bg-dark-900"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none">
@@ -195,7 +265,10 @@ export default function TableKecamatan() {
                   Deskripsi
                 </TableCell>
                 <TableCell isHeader className="px-5 py-3 font-medium text-start text-theme-xs text-gray-500 dark:text-gray-400">
-                  Area
+                  Area (ha)
+                </TableCell>
+                <TableCell isHeader className="px-5 py-3 font-medium text-start text-theme-xs text-gray-500 dark:text-gray-400">
+                  Komoditas Unggulan
                 </TableCell>
                 <TableCell isHeader className="px-5 py-3 font-medium text-center text-theme-xs text-gray-500 dark:text-gray-400">
                   Action
@@ -203,28 +276,45 @@ export default function TableKecamatan() {
               </TableRow>
             </TableHeader>
             <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-              {currentItems.map((item) => (
-                <TableRow key={item.id_kecamatan}>
-                  <TableCell className="px-5 py-3 text-theme-sm text-gray-800 dark:text-white/90">
-                    {item.nama_kecamatan}
-                  </TableCell>
-                  <TableCell className="px-5 py-3 text-theme-sm text-gray-500 text-justify dark:text-gray-400">
-                    {item.deskripsi}
-                  </TableCell>
-                  <TableCell className="px-5 py-3 text-theme-sm text-gray-500 dark:text-gray-400">
-                    <Badge size="sm" color="success">{item.area}</Badge>
-                  </TableCell>
-                  <TableCell className="px-5 py-3 text-theme-sm text-center">
-                    <button
-                      onClick={() => handleEdit(item.id_kecamatan)}
-                      className="bg-gray-50 border p-2 rounded-lg"
-                      disabled={isLoading}
-                    >
-                    <Image src="/icons/pencil.svg" width={20} height={20} alt="Pencil" />
-                    </button>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="px-5 py-8 text-center text-gray-500 dark:text-gray-400">
+                    Loading data...
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : currentItems.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="px-5 py-8 text-center text-gray-500 dark:text-gray-400">
+                    Tidak ada data yang sesuai dengan filter
+                  </TableCell>
+                </TableRow>
+              ) : (
+                currentItems.map((item) => (
+                  <TableRow key={item.id_kecamatan}>
+                    <TableCell className="px-5 py-3 text-theme-sm text-gray-800 dark:text-white/90">
+                      {item.nama_kecamatan}
+                    </TableCell>
+                    <TableCell className="px-5 py-3 text-theme-sm text-gray-500 text-justify dark:text-gray-400">
+                      {item.deskripsi}
+                    </TableCell>
+                    <TableCell className="px-5 py-3 text-theme-sm text-gray-500 dark:text-gray-400">
+                      {item.area}
+                    </TableCell>
+                    <TableCell className="px-5 py-3 text-theme-sm text-gray-500 dark:text-gray-400">
+                      <Badge size="sm" color="success">{item.nama_komoditas}</Badge>
+                    </TableCell>
+                    <TableCell className="px-5 py-3 text-theme-sm text-center">
+                      <button
+                        onClick={() => handleEdit(item.id_kecamatan)}
+                        className="bg-gray-50 border p-2 rounded-lg"
+                        disabled={isLoading}
+                      >
+                        <Image src="/icons/pencil.svg" width={20} height={20} alt="Pencil" />
+                      </button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
 

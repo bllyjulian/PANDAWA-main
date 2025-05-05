@@ -15,7 +15,7 @@ export default function CommodityPage() {
   return (
     <div>
       <div className="space-y-6">
-        <ComponentCard title="Tabel Kecamatan">
+        <ComponentCard title="Tabel Penduduk">
           <TablePenduduk />
         </ComponentCard>
       </div>
