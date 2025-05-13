@@ -1,24 +1,7 @@
 import { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 
-interface KecamatanData {
-    name: string;
-    path: string;
-    title: string;
-    luaspanen: string;
-    produksi: string;
-    produktivitas: string;
-    kec: string;
-    center: [number, number];
-    defaultColor?: string;
-}
 
-interface KecamatanDetailProps {
-    containerWidth: number;
-    containerHeight: number;
-    kecamatan: KecamatanData | null;
-    svg: d3.Selection<SVGSVGElement, unknown, null, undefined> | null;
-}
 
 export function KecamatanDetail({ containerWidth, containerHeight, kecamatan, svg }: KecamatanDetailProps) {
     const detailRef = useRef<{
@@ -60,16 +43,10 @@ export function KecamatanDetail({ containerWidth, containerHeight, kecamatan, sv
 
         detailRef.current.kecamatanTitle = kecamatanInfo.append("text")
             .attr("x", 15)
-            .attr("y", 25)
+            .attr("y", 45)
             .attr("font-size", "16px")
             .attr("font-weight", "bold")
             .attr("fill", "#7c3aed");
-
-        detailRef.current.komoditas = kecamatanInfo.append("text")
-            .attr("x", 15)
-            .attr("y", 45)
-            .attr("font-size", "14px")
-            .attr("fill", "#1f2937");
 
         detailRef.current.luasPanen = kecamatanInfo.append("text")
             .attr("x", 15)
@@ -91,7 +68,7 @@ export function KecamatanDetail({ containerWidth, containerHeight, kecamatan, sv
 
         detailRef.current.kec = kecamatanInfo.append("text")
             .attr("x", 95)
-            .attr("y", 20)
+            .attr("y", 25)
             .attr("font-size", "18px")
             .attr("fill", "#1f2937");
 
@@ -114,8 +91,7 @@ export function KecamatanDetail({ containerWidth, containerHeight, kecamatan, sv
                 return num !== null ? num.toLocaleString('id-ID') : val;
             };
         
-            detailRef.current.kecamatanTitle?.text(kecamatan.name);
-            detailRef.current.komoditas?.text(`Komoditas: ${kecamatan.title}`);
+            detailRef.current.kecamatanTitle?.text(kecamatan.title);
             detailRef.current.luasPanen?.text(`Luas Panen: ${formatNumber(kecamatan.luaspanen)} ha`);
             detailRef.current.produksi?.text(`Produksi: ${formatNumber(kecamatan.produksi)} ton`);
             detailRef.current.produktivitas?.text(`Produktivitas: ${formatNumber(kecamatan.produktivitas)} ton/ha`);

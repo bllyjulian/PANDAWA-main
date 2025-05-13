@@ -11,7 +11,7 @@ import { KecamatanDetail, hideKecamatanInfo } from '../components/map/KecamatanD
 import { FilterPanel } from '../components/map/FilterSebaran';
 import { InfoPanel } from '../components/map/InfoSebaran';
 
-import { dataSebaran } from '@/data/sebaran';
+import { dataKomoditas } from '@/data/komoditas';
 
 interface KecamatanData {
     name: string;
@@ -21,7 +21,19 @@ interface KecamatanData {
     area: string | number;
     population: string | number;
 }
-// MapInteractive.tsx
+
+// Enhanced pin data structure with all necessary fields
+export interface EnhancedPinData extends PinData {
+    id_panen: string;
+    position: [number, number];
+    category: string;
+    name?: string;
+    title?: string;
+    luaspanen?: string;
+    produksi?: string;
+    produktivitas?: string;
+    kec?: string;
+}
 
 const staticKecamatan = [
     {
@@ -193,11 +205,13 @@ export function Map() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
     const [selectedKecamatan, setSelectedKecamatan] = useState<KecamatanData | null>(null);
-
+    
+    const [komoditasData, setKomoditasData] = useState<EnhancedPinData[]>([]);
+    
     // Pin related states
-    const [pins, setPins] = useState<PinData[]>(dataSebaran);
+    const [pins, setPins] = useState<PinData[]>(dataKomoditas);
     const [activePinFilters, setActivePinFilters] = useState<Set<string>>(new Set(['all']));
-    const [selectedPin, setSelectedPin] = useState<PinData | null>(null);
+    const [selectedPin, setSelectedPin] = useState<EnhancedPinData | null>(null);
     const [showPins, setShowPins] = useState(true);
 
     // Check if we're in the browser environment
@@ -213,6 +227,7 @@ export function Map() {
 
     // Check if Kecamatan data is available
     const [kecamatanData, setKecamatanData] = useState<KecamatanData[]>([]);
+    
     const [mapError, setMapError] = useState<string | null>(null);
 
     // Add this useEffect to check if we're in browser
@@ -252,7 +267,6 @@ export function Map() {
       
         fetchAndMerge();
       }, []);
-      
 
     useEffect(() => {
         if (containerRef.current) {
@@ -273,6 +287,78 @@ export function Map() {
             setSelectedPin(null);
         }
     }, [isSidebarOpen]);
+
+    useEffect(() => {
+        async function fetchPanen() {
+          try {
+            const res = await fetch('/api/komoditas');
+            const hasilPanen = await res.json();
+            
+            // Convert dataKomoditas to accurate EnhancedPinData objects
+            const enhanced = dataKomoditas.map((pin) => {
+              // Find the matching data from API
+              const match = hasilPanen.find((data) => 
+                // Match based on id_panen pattern (e.g., "jagung-binakal")
+                // Assuming id_panen in the database contains the combination of komoditas and kecamatan names
+                data.id_panen === pin.id_panen ||
+                // As fallback, try to match by checking if the position/komoditas match
+                (data.nama_komoditas?.toLowerCase() === pin.category && 
+                 pin.id_panen?.includes(data.nama_kecamatan?.toLowerCase()))
+              );
+              
+              if (match) {
+                console.log("Found matching data:", match);
+                return {
+                  id_panen: pin.id_panen,
+                  position: pin.position,
+                  category: pin.category,
+                  name: match.nama_komoditas,
+                  title: match.nama_komoditas || pin.title || pin.category,
+                  luaspanen: match.luas_panen?.toString() || "-",
+                  produksi: match.produksi?.toString() || "-", 
+                  produktivitas: match.produktivitas?.toString() || "-",
+                  kec: match.nama_kecamatan || pin.id_panen.split('-')[1] || "Unknown"
+                };
+              } else {
+                // Fallback data with clear indication it's not found
+                console.warn(`No data found for pin: ${pin.id_panen}`);
+                return {
+                  id_panen: pin.id_panen,
+                  position: pin.position,
+                  category: pin.category,
+                  name: pin.category,  // Use category as name for fallback
+                  title: pin.title || `${pin.category} (No Data)`,
+                  luaspanen: "-",
+                  produksi: "-",
+                  produktivitas: "-",
+                  kec: pin.id_panen.split('-')[1] || "Unknown"
+                };
+              }
+            });
+            
+            setKomoditasData(enhanced);
+            console.log("Enhanced komoditas data:", enhanced);
+          } catch (err) {
+            console.error("Gagal ambil data hasil panen:", err);
+            // Set fallback data with clear indication it's fallback
+            const fallback = dataKomoditas.map(pin => ({
+              ...pin,
+              id_panen: pin.id_panen,
+              position: pin.position,
+              category: pin.category,
+              name: pin.category,
+              title: pin.title || `${pin.category} (Data Tidak Tersedia)`,
+              luaspanen: "-",
+              produksi: "-", 
+              produktivitas: "-",
+              kec: pin.id_panen.split('-')[1] || "Unknown"
+            }));
+            setKomoditasData(fallback);
+          }
+        }
+        
+        fetchPanen();
+      }, []);
 
     const togglePinFilter = (categoryId: string) => {
         const newFilters = new Set(activePinFilters);
@@ -405,11 +491,21 @@ export function Map() {
     };
 
     // Modified function to handle pin selection
-    const handlePinSelect = (pin: PinData) => {
-        setSelectedPin(pin);
-        // Close sidebar when a pin is selected
-        setIsSidebarOpen(false);
-    };
+    const handlePinSelect = (pin: { id_panen: string }) => {
+        console.log("Pin selected:", pin.id_panen);
+        const detail = komoditasData.find((k) => k.id_panen === pin.id_panen);
+        console.log("Found detail:", detail);
+        
+        if (detail) {
+          setSelectedPin(detail);
+          // Ensure kecamatan is deselected to prevent conflicts
+          setSelectedKecamatan(null);
+          // Close sidebar when a pin is selected
+          setIsSidebarOpen(false);
+        } else {
+          console.warn(`No matching komoditas data found for pin ${pin.id_panen}`);
+        }
+      };
 
     useEffect(() => {
         if (mapInstanceRef.current.svg && containerDimensions.width && containerDimensions.height) {
@@ -668,6 +764,11 @@ export function Map() {
         };
     }, [isBrowser]);
 
+    // Debug logging for selectedPin changes
+    useEffect(() => {
+        console.log("Selected pin changed:", selectedPin);
+    }, [selectedPin]);
+
     return (
         <div className="relative w-full h-screen">
             <Sidebar
@@ -711,7 +812,7 @@ export function Map() {
                                     />
                                 )}
 
-                                {!selectedKecamatan && selectedPin && (
+                                {!selectedKecamatan && selectedPin && mapInstanceRef.current.svg && (
                                     <KecamatanDetail
                                         containerWidth={containerDimensions.width}
                                         containerHeight={containerDimensions.height}

@@ -29,8 +29,8 @@ export async function PUT(
       );
     }
 
-    // Perform the update using id_panen as the primary key
-    const [result] = await db.query(
+    // First try to update using id_panen field
+    let [result] = await db.query(
       `UPDATE hasil_panen SET 
         id_kecamatan = ?, 
         id_komoditas = ?, 
@@ -43,7 +43,25 @@ export async function PUT(
     );
 
     // Check if any rows were affected
-    const updatedRows = (result as any).affectedRows;
+    let updatedRows = (result as any).affectedRows;
+    
+    // If no rows were affected, try with id field instead
+    if (updatedRows === 0) {
+      [result] = await db.query(
+        `UPDATE hasil_panen SET 
+          id_kecamatan = ?, 
+          id_komoditas = ?, 
+          tahun_panen = ?, 
+          luas_panen = ?, 
+          produksi = ?, 
+          produktivitas = ? 
+        WHERE id = ?`,
+        [id_kecamatan, id_komoditas, tahun_panen, luas_panen, produksi, produktivitas, id]
+      );
+      
+      updatedRows = (result as any).affectedRows;
+    }
+    
     if (updatedRows === 0) {
       return NextResponse.json(
         { error: 'Data hasil panen tidak ditemukan' },
@@ -54,7 +72,7 @@ export async function PUT(
     return NextResponse.json({
       message: 'Data hasil panen berhasil diupdate',
       updated: {
-        id_panen: id, // Also include id_panen for completeness
+        id_panen: id, // Include id_panen for completeness
         id_kecamatan,
         id_komoditas,
         tahun_panen,
