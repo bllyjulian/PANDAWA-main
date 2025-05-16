@@ -33,4 +33,5 @@ export default function ContentsLayout({ children }: { children: React.ReactNode
         </body>
       </html>
     );
+    
 }

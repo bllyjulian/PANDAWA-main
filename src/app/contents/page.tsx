@@ -322,4 +322,5 @@ export default function HomePage() {
       <script src="/assets/js/templatemo-custom.js"></script>
     </>
   );
+  
 }
