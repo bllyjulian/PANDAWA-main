@@ -79,6 +79,15 @@ export default function TableKecamatan() {
         }));
       
       setKecamatanOptions([{ value: '', label: 'Semua Kecamatan' }, ...uniqueKecamatan]);
+      
+      // Generate unique komoditas options from the kecamatan data
+      const uniqueKomoditas = Array.from(new Set(result.map((item: Kecamatan) => item.nama_komoditas)))
+        .map(komoditas => ({
+          value: komoditas as string,
+          label: komoditas as string
+        }));
+      
+      setKomoditasOptions([{ value: '', label: 'Semua Komoditas' }, ...uniqueKomoditas]);
     } catch (error) {
       console.error('Gagal mengambil data kecamatan:', error);
     } finally {
@@ -86,22 +95,12 @@ export default function TableKecamatan() {
     }
   };
 
-  // Fetch komoditas data
+  // Fetch komoditas data - we keep this for reference to API but don't use it for the dropdown
   const fetchKomoditasData = async () => {
     try {
       const res = await fetch('/api/komoditas');
       const result = await res.json();
-      
-      // Generate komoditas options for filter dropdown
-      const komoditasOptions = [
-        { value: '', label: 'Semua Komoditas' },
-        ...result.map((item: Komoditas) => ({
-          value: item.nama_komoditas,
-          label: item.nama_komoditas
-        }))
-      ];
-      
-      setKomoditasOptions(komoditasOptions);
+      // We don't set komoditas options here anymore since we use unique values from kecamatan data
     } catch (error) {
       console.error('Gagal mengambil data komoditas:', error);
     }
@@ -110,6 +109,7 @@ export default function TableKecamatan() {
   // Initial data fetch
   useEffect(() => {
     fetchKecamatanData();
+    // We still fetch komoditas data in case it's needed elsewhere
     fetchKomoditasData();
   }, []);
 

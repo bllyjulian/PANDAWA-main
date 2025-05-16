@@ -5,8 +5,11 @@ export async function PUT(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const id = parseInt(params.id);
-  if (isNaN(id)) {
+  const id = params.id;
+  
+  // No need to parse as integer since IDs can be strings
+  // Only validate that ID exists
+  if (!id) {
     return NextResponse.json({ error: 'ID tidak valid' }, { status: 400 });
   }
 
@@ -29,7 +32,7 @@ export async function PUT(
       );
     }
 
-    // First try to update using id_panen field
+    // First try with id_panen field
     let [result] = await db.query(
       `UPDATE hasil_panen SET 
         id_kecamatan = ?, 
@@ -45,8 +48,9 @@ export async function PUT(
     // Check if any rows were affected
     let updatedRows = (result as any).affectedRows;
     
-    // If no rows were affected, try with id field instead
     if (updatedRows === 0) {
+      // If no rows affected, the ID might not be numeric
+      // Try to find the record by the string ID if it exists in your schema
       [result] = await db.query(
         `UPDATE hasil_panen SET 
           id_kecamatan = ?, 
@@ -72,7 +76,7 @@ export async function PUT(
     return NextResponse.json({
       message: 'Data hasil panen berhasil diupdate',
       updated: {
-        id_panen: id, // Include id_panen for completeness
+        id_panen: id,
         id_kecamatan,
         id_komoditas,
         tahun_panen,
