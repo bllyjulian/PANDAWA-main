@@ -242,10 +242,6 @@
       }
     };
     
-    // Handle save button click
-// The key issue is in the handleSave function
-// We need to ensure we're using the correct ID when updating data
-
 const handleSave = async () => {
   if (!selectedItem) return;
   

@@ -15,7 +15,6 @@ export async function GET(req: NextRequest) {
     komoditas.nama_komoditas
   FROM data_kecamatan
   JOIN komoditas ON data_kecamatan.id_komoditas = komoditas.id_komoditas;
-  
     `);
 
     return NextResponse.json(rows);

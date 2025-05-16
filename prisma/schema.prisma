@@ -5,40 +5,87 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
-  output   = "../lib/generated/prisma"
+  provider  = "prisma-client-js"
+  output    = "../src/lib/generated/prisma"
 }
 
 datasource database {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
 model User {
   id                String    @id @default(uuid())
-  name              String?
+  first_name        String?
+  last_name         String?
   email             String?   @unique
-  password          String
+  email_verified    DateTime?
+  password          String?
+  image             String?
   created_at        DateTime  @default(now()) @map("created_at")
   updated_at        DateTime  @updatedAt @map("updated_at")
 
   detail            Detail?
+  accounts          Account[]
+  sessions          Session[]
 
   @@map("users")
 }
 
 model Detail {
-  tax_id            String    @id
+  id_detail         String    @id @default(uuid())
+  id_tax            String    @unique
   phone             String
   bio               String
   city              String
-  county            String
+  country            String
   post_kode         String
-  photo_profile     String
 
-  user              User      @relation(fields: [tax_id], references: [id])
+  user              User      @relation(fields: [id_tax], references: [id])
 
   @@map("detail")
+}
+
+model Account {
+  id                String    @id @default(cuid())
+  id_user           String    @map("id_user")
+  id_provider       String
+  id_token          String?   @database.Text
+  type              String
+  scope             String?
+  provider          String
+  expires_at        Int?
+  token_type        String?
+  access_token      String?   @database.Text
+  refresh_token     String?   @database.Text
+  session_state     String?
+
+  user              User      @relation(fields: [id_user], references: [id], onDelete: Cascade)
+
+  @@unique([provider, id_provider])
+  @@map("account")
+}
+
+model Session {
+  id                String    @id @default(cuid())
+  id_user           String    @map("id_user")
+  session_token     String    @unique
+  expires           DateTime
+
+  user              User      @relation(fields: [id_user], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+model VerificationToken {
+  identifier        String
+  token             String    @unique
+  expires           DateTime
+
+  @@unique([identifier, token])
+
+  @@map("token")
 }
 
 model Kecamatan {
@@ -51,6 +98,10 @@ model Kecamatan {
   area              Float
   posisi_x          Int
   posisi_y          Int
+
+  created_at        DateTime  @default(now()) @map("created_at")
+  updated_at        DateTime  @updatedAt @map("updated_at")
+
   penduduk          Penduduk[]
   hasil_panen       HasilPanen[]
   prediksi_panen    PrediksiPanen[]
@@ -66,6 +117,9 @@ model Penduduk {
   jumlah_penduduk   Float
   laju_pertumbuhan  String    @database.VarChar(30)
 
+  created_at        DateTime  @default(now()) @map("created_at")
+  updated_at        DateTime  @updatedAt @map("updated_at")
+
   @@map("data_penduduk")
 }
 
@@ -74,6 +128,11 @@ model Komoditas {
   nama_komoditas    String    @database.VarChar(100)
   posisi_x          Int
   posisi_y          Int
+
+  created_at        DateTime  @default(now()) @map("created_at")
+  updated_at        DateTime  @updatedAt @map("updated_at")
+  deleted_at        DateTime? @map("deleted_at")
+
   kecamatan         Kecamatan[]
   hasil_panen       HasilPanen[]
   prediksi_panen    PrediksiPanen[]
@@ -92,6 +151,9 @@ model HasilPanen {
   luas_panen        Float
   produktivitas     Float
 
+  created_at        DateTime  @default(now()) @map("created_at")
+  updated_at        DateTime  @updatedAt @map("updated_at")
+
   @@map("hasil_panen")
 }
 
@@ -103,6 +165,9 @@ model PrediksiPanen {
   komoditas         Komoditas @relation(fields: [id_komoditas], references: [id_komoditas])
   tahun_prediksi    Int
   hasil_prediksi    Int
+
+  created_at        DateTime  @default(now()) @map("created_at")
+  updated_at        DateTime  @updatedAt @map("updated_at")
 
   @@map("prediksi_panen")
 }
