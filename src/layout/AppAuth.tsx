@@ -85,7 +85,7 @@ export default function AppAuth() {
                             Log In
                         </h1>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                            Enter your email and password to Log in!
+                            Silahkan Masukkan Email dan Password anda Untuk Log-in Ke Aplikasi!
                         </p>
                     </div>
                     <div>
@@ -115,7 +115,7 @@ export default function AppAuth() {
                                     <div className="relative">
                                         <Input
                                             type={showPassword ? "text" : "password"}
-                                            placeholder="Enter your password"
+                                            placeholder="Masukkan password"
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
                                             required
@@ -133,20 +133,11 @@ export default function AppAuth() {
                                     </div>
                                 </div>
                                 <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <Checkbox 
-                                            checked={isChecked} 
-                                            onChange={setIsChecked} 
-                                        />
-                                        <span className="block font-normal text-gray-700 text-theme-sm dark:text-gray-400">
-                                            Keep me logged in
-                                        </span>
-                                    </div>
                                     <Link
                                         href="/reset-password"
                                         className="text-sm text-brand-500 hover:text-brand-600 dark:text-brand-400"
                                     >
-                                        Forgot password?
+                                        Lupa password?
                                     </Link>
                                 </div>
                                 <div>

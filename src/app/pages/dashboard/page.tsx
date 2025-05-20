@@ -3,6 +3,8 @@ import { DashboardMetrics } from "@/components/pages/DashboardMetrics";
 import React from "react";
 import MonthlyTarget from "@/components/pages/MonthlyTarget";
 import MonthlyChart from "@/components/pages/MonthlyChart";
+import RecentOrders from "@/components/pages/RecentOrders";
+
 
 export const metadata: Metadata = {
   title:
@@ -16,11 +18,12 @@ export default function DashboardPage() {
       <div className="col-span-12 space-y-6 xl:col-span-7">
         <DashboardMetrics />
 
-        <MonthlyChart />
+        <MonthlyChart/>
       </div>
 
       <div className="col-span-12 xl:col-span-5">
-        <MonthlyTarget />
+
+      <RecentOrders />
       </div>
     </div>
   );

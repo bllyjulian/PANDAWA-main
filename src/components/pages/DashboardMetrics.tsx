@@ -15,15 +15,15 @@ export const DashboardMetrics = () => {
         <div className="flex items-end justify-between mt-5">
           <div>
             <span className="text-sm text-gray-500 dark:text-gray-400">
-              Laju Pertumbuhan
+              Total Penduduk
             </span>
             <h4 className="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">
-              3,782
+               781.007
             </h4>
           </div>
           <Badge color="success">
             <Image src="/icons/arrow-up.svg" width={20} height={20} alt="Arrow Up" />
-            11.01%
+            1.12%
           </Badge>
         </div>
       </div>
@@ -40,14 +40,11 @@ export const DashboardMetrics = () => {
               Jumlah Komoditas
             </span>
             <h4 className="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">
-              5,359
+              13
             </h4>
           </div>
 
-          <Badge color="error">
-            <Image src="/icons/arrow-down.svg" width={20} height={20} alt="Arrow Down" className="text-error-500" />
-            9.05%
-          </Badge>
+
         </div>
       </div>
       {/* <!-- Metric Item End --> */}
