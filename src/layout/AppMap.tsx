@@ -13,5 +13,6 @@ export default function MapClient() {
         <Suspense fallback={<div className="flex h-screen items-center justify-center">Loading...</div>}>
             <MapInteractive />
         </Suspense>
+        
     );
 }
