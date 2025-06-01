@@ -45,8 +45,6 @@ export default function MonthlyChart() {
         "Padi",
         "Kelapa",
         "Kopi",
-        "Tebu",
-        "Tembakau",
       ],
       axisBorder: {
         show: false,
@@ -89,7 +87,7 @@ export default function MonthlyChart() {
   const series = [
     {
       name: "Jumlah (ton)",
-      data: [166.046, 80.334, 464.766, 3.097, 8.439, 470.091, 10.737],
+      data: [166.046, 80.334, 464.766, 3.097, 8.439],
     },
   ];
   const [isOpen, setIsOpen] = useState(false);

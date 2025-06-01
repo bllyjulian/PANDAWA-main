@@ -457,13 +457,7 @@ export default function TableHasilPanen() {
                       >
                         <Image src="/icons/pencil.svg" width={20} height={20} alt="Edit" />
                       </button>
-                      <button
-                        onClick={() => handleDelete(item.id_panen)}
-                        className="bg-gray-50 border p-2 fill-red-600 rounded-lg"
-                        disabled={isLoading}
-                      >
-                        <Image src="/icons/trash.svg" width={20} height={20} alt="Delete" />
-                      </button>
+                      
                     </TableCell>
                   </TableRow>
                 ))

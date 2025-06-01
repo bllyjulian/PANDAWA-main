@@ -110,10 +110,14 @@ export const InfoPanel: React.FC<InfoPanelProps> = ({ pin, onClose, pinCategorie
                                 <path d="M10 2a8 8 0 1 0 8 8 8.01 8.01 0 0 0-8-8Zm0 14a6 6 0 1 1 6-6 6.006 6.006 0 0 1-6 6Z" />
                             </svg>
                             <p className="text-xs text-gray-500">Komoditas Utama</p>
-                            <p
-                                className="text-sm font-medium text-center text-gray-800"
-                                dangerouslySetInnerHTML={{ __html: pin.komoditastertinggi || "-" }}
-                            ></p>
+                            <p className="text-sm font-medium text-center text-gray-800">
+                          {pin.komoditastertinggi}
+                            <p className="text-sm font-medium text-center text-gray-800">
+                            {pin.produksikomoditas}  ton  
+  </p>
+
+</p>
+
 
                         </div>
                     </div>

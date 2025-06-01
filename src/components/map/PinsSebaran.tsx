@@ -14,6 +14,7 @@ export interface PinData {
     laju?: string;
     area?: string;
     komoditastertinggi?: string;
+    produksikomoditas?: string;
     category: string;
     color?: string;
     gambar?: string;

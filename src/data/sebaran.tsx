@@ -84,7 +84,7 @@ export const dataSebaran: PinData[] = [
         id: 'jagung-tapen', 
         position: [472, 413], 
         title: 'Jagung', 
-        luaspanen: "1414",
+        luaspanen: "1414", 
         produksi: "7879",
         produktivitas: "5.57",
         kec: "Tapen",

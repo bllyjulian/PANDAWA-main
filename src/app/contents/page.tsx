@@ -148,31 +148,29 @@ export default function HomePage() {
           <p>Platform ini dirancang untuk membantu instansi pemerintah Kabupaten Bondowoso dalam pemantauan dan pengelolaan sumber daya alam berbasis teknologi geospasial.</p>
         </div>
         <div className="row">
-          <div className="col-lg-12">
-            <div className="first-bar progress-skill-bar">
-              <h4>Pemetaan Sumber Daya Alam</h4>
-              <span>84%</span>
-              <div className="filled-bar"></div>
-              <div className="full-bar"></div>
+          {[
+            { nama: 'Jagung', jumlah: '166.046 ton' },
+            { nama: 'Ubi Kayu', jumlah: '80.344 ton' },
+            { nama: 'Padi', jumlah: '464.766 ton' },
+            { nama: 'Kelapa', jumlah: '3.097 ton' },
+            { nama: 'Kopi', jumlah: '8.439 ton' },
+          ].map((item, index) => (
+            <div className="col-lg-4 mb-4" key={index}>
+              <div
+                className="commodity-box p-4 rounded text-center"
+                style={{
+                  backgroundColor: '#FF3448',
+                  color: 'white',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                }}
+              >
+                <h5>{item.nama}</h5>
+                <p style={{color:'white'}}>{item.jumlah}</p>
+              </div>
             </div>
-          </div>
-          <div className="col-lg-12">
-            <div className="second-bar progress-skill-bar">
-              <h4>Prediksi Total Hasil Panen</h4>
-              <span>88%</span>
-              <div className="filled-bar"></div>
-              <div className="full-bar"></div>
-            </div>
-          </div>
-          <div className="col-lg-12">
-            <div className="third-bar progress-skill-bar">
-              <h4>Visualisasi Data Geospasial</h4>
-              <span>94%</span>
-              <div className="filled-bar"></div>
-              <div className="full-bar"></div>
-            </div>
-          </div>
+          ))}
         </div>
+
       </div>
     </div>
   </div>
