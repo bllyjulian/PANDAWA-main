@@ -1,9 +1,5 @@
 import * as d3 from 'd3';
 
-// Constants for zoom behavior
-const DEFAULT_ZOOM_OFFSET = { x: -80, y: 60 };
-const PIN_ZOOM_SCALE = 2.5;
-
 // Define pin interface
 export interface PinData {
     id: string;
@@ -21,7 +17,7 @@ export interface PinData {
     customIcon?: string;
 }
 
-// Define pin categories with improved icons and colors
+// Define pin categories
 export const pinCategories = [
     {
         id: 'all',
@@ -32,7 +28,7 @@ export const pinCategories = [
     {
         id: 'padi',
         label: 'Padi',
-        color: '#16a34a' ,
+        color: '#16a34a',
         icon: '/pins/iconPadi.png',
         type: 'image',
     },
@@ -60,7 +56,6 @@ export const pinCategories = [
         color: '#6b3e26',
         icon: '/pins/kopi.png',
     },
-    
 ];
 
 // Function to create pins on the map
@@ -71,13 +66,13 @@ export const createPins = (
     activePinFilters: Set<string>,
     showPins: boolean,
     containerRef: React.RefObject<HTMLDivElement>,
-    setSelectedPin: (pin: PinData | null) => void,
+    onPinClick: (pin: PinData) => void, // Kita ganti namanya biar jelas ini callback
     zoom: d3.ZoomBehavior<Element, unknown>
 ) => {
     // Remove existing pins to avoid duplicates
     g.select(".pin-group").remove();
 
-    // Create a group for pins (ikut transform dari g)
+    // Create a group for pins
     const pinGroup = g.append("g")
         .attr("class", "pin-group")
         .style("display", showPins ? "block" : "none");
@@ -104,55 +99,40 @@ export const createPins = (
         pin.attr("data-color", d.color || category.color);
         pin.attr("data-icon", d.customIcon || category.icon);
 
-        // Drop shadow
+        // Drop shadow defs (sama seperti sebelumnya)
         const defs = pin.append("defs");
         const filter = defs.append("filter")
             .attr("id", `drop-shadow-${d.id}`)
-            .attr("x", "-50%")
-            .attr("y", "-50%")
-            .attr("width", "200%")
-            .attr("height", "200%");
-        filter.append("feGaussianBlur")
-            .attr("in", "SourceAlpha")
-            .attr("stdDeviation", 0.5)
-            .attr("result", "blur");
-        filter.append("feOffset")
-            .attr("in", "blur")
-            .attr("dx", 0)
-            .attr("dy", 0.5)
-            .attr("result", "offsetBlur");
+            .attr("x", "-50%").attr("y", "-50%").attr("width", "200%").attr("height", "200%");
+        filter.append("feGaussianBlur").attr("in", "SourceAlpha").attr("stdDeviation", 0.5).attr("result", "blur");
+        filter.append("feOffset").attr("in", "blur").attr("dx", 0).attr("dy", 0.5).attr("result", "offsetBlur");
         const feMerge = filter.append("feMerge");
         feMerge.append("feMergeNode").attr("in", "offsetBlur");
         feMerge.append("feMergeNode").attr("in", "SourceGraphic");
 
         pin.append("circle")
             .attr("class", "pin-circle")
-            .attr("cx", 0)
-            .attr("cy", 0)
-            .attr("r", 10)
+            .attr("cx", 0).attr("cy", 0).attr("r", 10) // Ukuran default lebih kecil sedikit biar rapi
             .attr("fill", d.color || category.color)
             .attr("stroke", "white")
             .attr("stroke-width", 1.5)
             .attr("filter", `url(#drop-shadow-${d.id})`);
 
-            pin.append("image")
+        pin.append("image")
             .attr("class", "pin-icon")
-            .attr("x", -6)
-            .attr("y", -6)
-            .attr("width", 12)  // Ukuran gambar, bisa disesuaikan
-            .attr("height", 12)
-            .attr("xlink:href", category.icon);  // Pastikan ini benar
+            .attr("x", -6).attr("y", -6)
+            .attr("width", 12).attr("height", 12)
+            .attr("xlink:href", category.icon);
 
+        // Tooltip sederhana (bubble)
         const fo = pin.append("foreignObject")
-            .attr("x", -40)
-            .attr("y", -35)
-            .attr("width", 80)
-            .attr("height", 40)
+            .attr("x", -40).attr("y", -35)
+            .attr("width", 80).attr("height", 40)
             .style("overflow", "visible")
             .style("pointer-events", "none")
             .attr("class", "pin-bubble")
             .style("opacity", 0);
-        
+
         fo.append("xhtml:div")
             .style("background", "white")
             .style("border", "1px solid #ccc")
@@ -161,66 +141,47 @@ export const createPins = (
             .style("text-align", "center")
             .style("font-size", "10px")
             .style("color", "#333")
+            .style("white-space", "nowrap")
             .style("box-shadow", "0 2px 6px rgba(0,0,0,0.15)")
-            .style("transition", "opacity 0.3s ease, transform 0.3s ease")
             .text(d.title);
-        
-        
-            
     });
 
-    // ❌ Hapus updatePinsOnZoom dan jangan override zoom transform
-    svg.on("zoom.pins", null);
-
-    // Hover dan click
+    // Event Listeners
     pinElements
-    .on("mouseover", function () {
-        d3.select(this).raise();
-        d3.select(this).selectAll("circle")
-            .transition()
-            .duration(200)
-            .attr("r", 12)
-            .attr("stroke-width", 2.5);
-    
-        d3.select(this).select(".pin-bubble")
-            .transition()
-            .duration(200)
-            .style("opacity", 1)
-            .style("transform", "translateY(-5px)");
-    })
-    .on("mouseout", function () {
-        d3.select(this).selectAll("circle")
-            .transition()
-            .duration(200)
-            .attr("r", 10)
-            .attr("stroke-width", 1.5);
-    
-        d3.select(this).select(".pin-bubble")
-            .transition()
-            .duration(200)
-            .style("opacity", 0)
-            .style("transform", "translateY(0px)");
-    })
-    
+        .on("mouseover", function () {
+            d3.select(this).raise(); // Bawa ke paling depan
+            d3.select(this).selectAll("circle")
+                .transition().duration(200)
+                .attr("r", 14) // Membesar saat hover
+                .attr("stroke-width", 2);
+
+            d3.select(this).select(".pin-bubble")
+                .transition().duration(200)
+                .style("opacity", 1)
+                .style("transform", "translateY(-5px)");
+        })
+        .on("mouseout", function () {
+            d3.select(this).selectAll("circle")
+                .transition().duration(200)
+                .attr("r", 10) // Kembali ke ukuran semula
+                .attr("stroke-width", 1.5);
+
+            d3.select(this).select(".pin-bubble")
+                .transition().duration(200)
+                .style("opacity", 0)
+                .style("transform", "translateY(0px)");
+        })
         .on("click", function (event, d) {
+            // PENTING: Stop event agar tidak menembus ke peta (map reset)
             event.stopPropagation();
-            setSelectedPin(d);
-
-            const containerWidth = containerRef.current!.clientWidth;
-            const containerHeight = containerRef.current!.clientHeight;
-
-            const transform = d3.zoomIdentity
-                .translate(containerWidth / 2, containerHeight / 2)
-                .scale(PIN_ZOOM_SCALE)
-                .translate(-d.position[0], -d.position[1])
-                .translate(DEFAULT_ZOOM_OFFSET.x, DEFAULT_ZOOM_OFFSET.y);
-
-            svg.transition()
-                .duration(750)
-                .call(zoom.transform, transform);
+            
+            // Panggil fungsi handlePinSelect dari Map.tsx
+            // Biarkan Map.tsx yang menghitung koordinat tengah dan melakukan zoom
+            if (onPinClick) {
+                onPinClick(d); 
+            }
         });
 };
-
 
 // Function to update pin visibility based on filters
 export const updatePinVisibility = (
@@ -229,88 +190,30 @@ export const updatePinVisibility = (
     showPins: boolean
 ) => {
     if (!svg) return;
-
-    // Only select elements with the ".pin" class (avoid selecting non-pin elements)
     const showAll = filters.has('all');
 
-    // Update visibility for all pins
-    svg.selectAll("g.pin") // Be more specific with the selector
+    svg.selectAll("g.pin")
         .style("display", function (d: any) {
             if (!showPins) return "none";
             return showAll || filters.has(d.category) ? "block" : "none";
         });
-
-    // Also update the container visibility
-    svg.select(".fixed-size-pin-container")
-        .style("display", showPins ? "block" : "none");
-
-    svg.select(".pin-group")
-        .style("display", showPins ? "block" : "none");
+    
+    // Pastikan container utama juga terlihat
+    svg.select(".pin-group").style("display", showPins ? "block" : "none");
 };
 
-// Function to reset pins without recreating them
+// Function to reset pins visual state
 export const resetPins = (
     svg: d3.Selection<SVGSVGElement, unknown, null, undefined> | null
 ) => {
     if (!svg) return;
-
-    // Reset using data attributes, targeting only pin elements
     svg.selectAll("g.pin").each(function () {
         const pin = d3.select(this);
         const originalColor = pin.attr("data-color");
-
-        // Only reset the fill on circles within pins
+        
         pin.select(".pin-circle")
-            .transition()
-            .duration(300)
-            .attr("fill", originalColor);
-
-        // Ensure icon is white
-        pin.select(".pin-icon")
-            .attr("fill", "white");
+            .transition().duration(300)
+            .attr("fill", originalColor)
+            .attr("r", 10); // Reset radius juga
     });
-};
-
-// Improved zoom transform calculation with offset support
-export const calculateZoomTransform = (
-    containerWidth: number,
-    containerHeight: number,
-    bounds: { minX: number; maxX: number; minY: number; maxY: number },
-    fixedScale?: number,
-    offsetX: number = 0,
-    offsetY: number = 0
-) => {
-    const width = bounds.maxX - bounds.minX;
-    const height = bounds.maxY - bounds.minY;
-    const centerX = bounds.minX + width / 2;
-    const centerY = bounds.minY + height / 2;
-
-    if (fixedScale !== undefined) {
-        return d3.zoomIdentity
-            .translate(containerWidth / 2, containerHeight / 2)
-            .scale(fixedScale)
-            .translate(-centerX, -centerY)
-            .translate(offsetX, offsetY);
-    }
-
-    const scale = 0.9 / Math.max(width / containerWidth, height / containerHeight);
-    return d3.zoomIdentity
-        .translate(containerWidth / 2, containerHeight / 2)
-        .scale(scale)
-        .translate(-centerX, -centerY)
-        .translate(offsetX, offsetY);
-};
-
-// Helper function to convert an SVG string to a path data string
-export const svgToPathData = (svgString: string): string => {
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = svgString.trim();
-
-    const paths = tempDiv.querySelectorAll('path');
-    if (paths.length === 0) return '';
-
-    return Array.from(paths)
-        .map(path => path.getAttribute('d'))
-        .filter(Boolean)
-        .join(' ');
 };
