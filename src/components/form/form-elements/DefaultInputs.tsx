@@ -4,7 +4,7 @@ import ComponentCard from '../../common/ComponentCard';
 import Label from '../Label';
 import Input from '../input/InputField';
 import Select from '../Select';
-import { ChevronDownIcon, EyeCloseIcon, EyeIcon, TimeIcon } from '../../../../public/icons';
+import { ChevronDownIcon, EyeCloseIcon, EyeIcon, TimeIcon } from '@/icons';
 import DatePicker from '@/components/tables/DatePicker';
 
 export default function DefaultInputs() {
