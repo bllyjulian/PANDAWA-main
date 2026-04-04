@@ -4,9 +4,11 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> } // <-- PERUBAHAN 1: Jadikan Promise
 ) {
-  const id = parseInt(params.id);
+  const { id: paramId } = await params; // <-- PERUBAHAN 2: Tambahkan await
+  const id = parseInt(paramId);
+  
   if (isNaN(id)) {
     return NextResponse.json({ error: 'ID tidak valid' }, { status: 400 });
   }
