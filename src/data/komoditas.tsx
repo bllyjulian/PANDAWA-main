@@ -133,138 +133,138 @@ export const dataKomoditas: PinData[] = [
         category: 'jagung' 
     },
 
-    // UBI KAYU (CASSAVA) DATA
+    //  KAYU (CASSAVA) DATA
     { 
-        id_panen: 'ubi-maesan', 
+        id_panen: 'tembakau-maesan', 
         position: [300, 634], 
-        title: 'Ubi Kayu', 
-        category: 'ubi' 
+        title: 'Tembakau', 
+        category: 'tembakau' 
     },
     { 
-        id_panen: 'ubi-grujugan', 
+        id_panen: 'tembakau-grujugan', 
         position: [226, 536], 
-        title: 'Ubi Kayu', 
-        category: 'ubi' 
+        title: 'Tembakau', 
+        category: 'tembakau' 
     },
     { 
-        id_panen: 'ubi-tamanan', 
+        id_panen: 'tembakau-tamanan', 
         position: [351, 627], 
-        title: 'Ubi Kayu', 
-        category: 'ubi' 
+        title: 'Tembakau', 
+        category: 'tembakau' 
     },
     { 
-        id_panen: 'ubi-jambesari', 
+        id_panen: 'tembakau-jambesari', 
         position: [400, 585], 
-        title: 'Ubi Kayu', 
-        category: 'ubi' 
+        title: 'Tembakau', 
+        category: 'tembakau' 
     },
     { 
-        id_panen: 'ubi-pujer', 
+        id_panen: 'tembakau-pujer', 
         position: [433, 569], 
-        title: 'Ubi Kayu', 
-        category: 'ubi' 
+        title: 'Tembakau', 
+        category: 'tembakau' 
     },
     { 
-        id_panen: 'ubi-tlogosari', 
+        id_panen: 'tembakau-tlogosari', 
         position: [600, 668], 
-        title: 'Ubi Kayu', 
-        category: 'ubi' 
+        title: 'Tembakau', 
+        category: 'tembakau' 
     },
     { 
-        id_panen: 'ubi-sukosari', 
+        id_panen: 'tembakau-sukosari', 
         position: [500, 530], 
-        title: 'Ubi Kayu', 
-        category: 'ubi' 
+        title: 'Tembakau', 
+        category: 'tembakau' 
     },
     { 
-        id_panen: 'ubi-sumberwringin', 
+        id_panen: 'tembakau-sumberwringin', 
         position: [642, 667], 
-        title: 'Ubi Kayu', 
-        category: 'ubi' 
+        title: 'Tembakau', 
+        category: 'tembakau' 
     },
     { 
-        id_panen: 'ubi-tapen', 
+        id_panen: 'tembakau-tapen', 
         position: [530, 411], 
-        title: 'Ubi Kayu', 
-        category: 'ubi' 
+        title: 'Tembakau', 
+        category: 'tembakau' 
     },
     { 
-        id_panen: 'ubi-wonosari', 
+        id_panen: 'tembakau-wonosari', 
         position: [473, 464], 
-        title: 'Ubi Kayu', 
-        category: 'ubi' 
+        title: 'Tembakau', 
+        category: 'tembakau' 
     },
     { 
-        id_panen: 'ubi-tenggarang', 
+        id_panen: 'tembakau-tenggarang', 
         position: [371, 512], 
-        title: 'Ubi Kayu', 
-        category: 'ubi' 
+        title: 'Tembakau', 
+        category: 'tembakau' 
     },
     { 
-        id_panen: 'ubi-bondowoso', 
+        id_panen: 'tembakau-bondowoso', 
         position: [329, 500], 
-        title: 'Ubi Kayu', 
-        category: 'ubi' 
+        title: 'Tembakau', 
+        category: 'tembakau' 
     },
     { 
-        id_panen: 'ubi-curahdami', 
+        id_panen: 'tembakau-curahdami', 
         position: [243, 499], 
-        title: 'Ubi Kayu', 
-        category: 'ubi' 
+        title: 'Tembakau', 
+        category: 'tembakau' 
     },
     { 
-        id_panen: 'ubi-binakal', 
+        id_panen: 'tembakau-binakal', 
         position: [245, 449], 
-        title: 'Ubi Kayu', 
-        category: 'ubi' 
+        title: 'Tembakau', 
+        category: 'tembakau' 
     },
     { 
-        id_panen: 'ubi-pakem', 
+        id_panen: 'tembakau-pakem', 
         position: [170, 460], 
-        title: 'Ubi Kayu', 
-        category: 'ubi' 
+        title: 'Tembakau', 
+        category: 'tembakau' 
     },
     { 
-        id_panen: 'ubi-wringin', 
+        id_panen: 'tembakau-wringin', 
         position: [284, 380], 
-        title: 'Ubi Kayu', 
-        category: 'ubi' 
+        title: 'Tembakau', 
+        category: 'tembakau' 
     },
     { 
-        id_panen: 'ubi-tegalampel', 
+        id_panen: 'tembakau-tegalampel', 
         position: [326, 419], 
-        title: 'Ubi Kayu', 
-        category: 'ubi' 
+        title: 'Tembakau', 
+        category: 'tembakau' 
     },
     { 
-        id_panen: 'ubi-tamankrocok', 
+        id_panen: 'tembakau-tamankrocok', 
         position: [406, 399], 
-        title: 'Ubi Kayu', 
-        category: 'ubi' 
+        title: 'Tembakau', 
+        category: 'tembakau' 
     },
     { 
-        id_panen: 'ubi-klabang', 
+        id_panen: 'tembakau-klabang', 
         position: [550, 400], 
-        title: 'Ubi Kayu', 
-        category: 'ubi' 
+        title: 'Tembakau', 
+        category: 'tembakau' 
     },
     { 
-        id_panen: 'ubi-botolinggo', 
+        id_panen: 'tembakau-botolinggo', 
         position: [615, 407], 
-        title: 'Ubi Kayu', 
-        category: 'ubi' 
+        title: 'Tembakau', 
+        category: 'tembakau' 
     },
     { 
-        id_panen: 'ubi-prajekan', 
+        id_panen: 'tembakau-prajekan', 
         position: [519, 289], 
-        title: 'Ubi Kayu', 
-        category: 'ubi' 
+        title: 'Tembakau', 
+        category: 'tembakau' 
     },
     { 
-        id_panen: 'ubi-cermee', 
+        id_panen: 'tembakau-cermee', 
         position: [687, 333], 
-        title: 'Ubi Kayu', 
-        category: 'ubi' 
+        title: 'Tembakau', 
+        category: 'tembakau' 
     },
     
     // PADI (RICE) DATA
@@ -400,206 +400,4 @@ export const dataKomoditas: PinData[] = [
         title: 'Padi', 
         category: 'padi' 
     },
-
-    // KELAPA (COCONUT) DATA
-    {
-        id_panen: 'kelapa-maesan',
-        position: [260, 615],
-        title: 'Kelapa',
-        category: 'kelapa'
-    },
-    {
-        id_panen: 'kelapa-grujugan',
-        position: [245, 565],
-        title: 'Kelapa',
-        category: 'kelapa'
-    },
-    {
-        id_panen: 'kelapa-tamanan',
-        position: [372, 610],
-        title: 'Kelapa',
-        category: 'kelapa'
-    },
-    {
-        id_panen: 'kelapa-jambesari',
-        position: [389, 550],
-        title: 'Kelapa',
-        category: 'kelapa'
-    },
-    {
-        id_panen: 'kelapa-sukosari',
-        position: [505, 485],
-        title: 'Kelapa',
-        category: 'kelapa'
-    },
-    {
-        id_panen: 'kelapa-sumberwringin',
-        position: [635, 630],
-        title: 'Kelapa',
-        category: 'kelapa'
-    },
-    {
-        id_panen: 'kelapa-tapen',
-        position: [515, 465],
-        title: 'Kelapa',
-        category: 'kelapa'
-    },
-    {
-        id_panen: 'kelapa-wonosari',
-        position: [415, 465],
-        title: 'Kelapa',
-        category: 'kelapa'
-    },
-    {
-        id_panen: 'kelapa-bondowoso',
-        position: [330, 472],
-        title: 'Kelapa',
-        category: 'kelapa'
-    },
-    {
-        id_panen: 'kelapa-curahdami',
-        position: [295, 505],
-        title: 'Kelapa',
-        category: 'kelapa'
-    },
-    {
-        id_panen: 'kelapa-binakal',
-        position: [225, 465],
-        title: 'Kelapa',
-        category: 'kelapa'
-    },
-    {
-        id_panen: 'kelapa-pakem',
-        position: [189, 425],
-        title: 'Kelapa',
-        category: 'kelapa'
-    },
-    {
-        id_panen: 'kelapa-tamankrocok',
-        position: [450, 370],
-        title: 'Kelapa',
-        category: 'kelapa'
-    },
-    {
-        id_panen: 'kelapa-klabang',
-        position: [470, 345],
-        title: 'Kelapa',
-        category: 'kelapa'
-    },
-    {
-        id_panen: 'kelapa-botolinggo',
-        position: [690, 550],
-        title: 'Kelapa',
-        category: 'kelapa'
-    },
-    {
-        id_panen: 'kelapa-prajekan',
-        position: [630, 340],
-        title: 'Kelapa',
-        category: 'kelapa'
-    },
-    {
-        id_panen: 'kelapa-cermee',
-        position: [710, 480],
-        title: 'Kelapa',
-        category: 'kelapa'
-    },
-    
-    // KOPI (COFFEE) DATA
-    {
-        id_panen: 'kopi-maesan',
-        position: [250, 608],
-        title: 'Kopi',
-        category: 'kopi'
-    },
-    {
-        id_panen: 'kopi-grujugan',
-        position: [255, 540],
-        title: 'Kopi',
-        category: 'kopi'
-    },
-    {
-        id_panen: 'kopi-tamanan',
-        position: [334, 598],
-        title: 'Kopi',
-        category: 'kopi'
-    },
-    {
-        id_panen: 'kopi-pujer',
-        position: [430, 540],
-        title: 'Kopi',
-        category: 'kopi'
-    },
-    {
-        id_panen: 'kopi-tlogosari',
-        position: [535, 635],
-        title: 'Kopi',
-        category: 'kopi'
-    },
-    {
-        id_panen: 'kopi-sukosari',
-        position: [479, 495],
-        title: 'Kopi',
-        category: 'kopi'
-    },
-    {
-        id_panen: 'kopi-sumberwringin',
-        position: [665, 630],
-        title: 'Kopi',
-        category: 'kopi'
-    },
-    {
-        id_panen: 'kopi-curahdami',
-        position: [295, 445],
-        title: 'Kopi',
-        category: 'kopi'
-    },
-    {
-        id_panen: 'kopi-binakal',
-        position: [265, 400],
-        title: 'Kopi',
-        category: 'kopi'
-    },
-    {
-        id_panen: 'kopi-pakem',
-        position: [135, 500],
-        title: 'Kopi',
-        category: 'kopi'
-    },
-    {
-        id_panen: 'kopi-tegalampel',
-        position: [340, 375],
-        title: 'Kopi',
-        category: 'kopi'
-    },
-    {
-        id_panen: 'kopi-tamankrocok',
-        position: [380, 370],
-        title: 'Kopi',
-        category: 'kopi'
-    },
-    {
-        id_panen: 'kopi-klabang',
-        position: [480, 300],
-        title: 'Kopi',
-        category: 'kopi'
-    },
-    {
-        id_panen: 'kopi-ijen',
-        position: [860, 640],
-        title: 'Kopi',
-        category: 'kopi'
-    },
-    {
-        id_panen: 'kopi-botolinggo',
-        position: [635, 500],
-        title: 'Kopi',
-        category: 'kopi'
-    },
-    {
-        id_panen: 'kopi-cermee',
-        position: [680, 270],
-        title: 'Kopi',
-        category: 'kopi'
-    }
 ];

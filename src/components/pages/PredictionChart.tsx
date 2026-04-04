@@ -8,14 +8,14 @@ const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
 });
 
-export default function MonthlyChart() {
+export default function PredictionChart() {
   const [chartData, setChartData] = useState<{ categories: string[], data: number[] }>({
     categories: [],
     data: []
   });
   const [allData, setAllData] = useState<any[]>([]);
-  const [yearOptions, setYearOptions] = useState<string[]>([]);
-  const [selectedYear, setSelectedYear] = useState<string>("");
+  const [komoditasOptions, setKomoditasOptions] = useState<string[]>([]); 
+  const [selectedKomoditas, setSelectedKomoditas] = useState<string>(""); // Dikosongkan dulu, nanti di-set saat fetch
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -27,20 +27,23 @@ export default function MonthlyChart() {
         const result = await res.json();
         
         if (Array.isArray(result)) {
-          setAllData(result);
+          // Filter hanya tahun 2026
+          const data2026 = result.filter(item => String(item.tahun_panen || item.tahun) === "2026");
+          setAllData(data2026);
 
-          const years = Array.from(new Set(result.map((item: any) => String(item.tahun_panen || item.tahun))))
-            .filter(y => y !== "undefined" && y !== "null")
-            .sort((a, b) => Number(b) - Number(a)); 
+          // Ambil daftar nama komoditas unik
+          const komoditas = Array.from(new Set(data2026.map((item: any) => item.nama_komoditas?.trim())))
+            .filter(k => k && k !== "undefined" && k !== "null") as string[];
 
-          setYearOptions(years);
+          setKomoditasOptions(komoditas);
           
-          if (years.length > 0) {
-            setSelectedYear(years[0]);
+          // SET DEFAULT KOMODITAS KE ITEM PERTAMA (Misal: "Padi")
+          if (komoditas.length > 0) {
+              setSelectedKomoditas(komoditas[0]);
           }
         }
       } catch (error) {
-        console.error("Error fetching chart data:", error);
+        console.error("Error fetching prediction data:", error);
       } finally {
         setIsLoading(false);
       }
@@ -50,17 +53,19 @@ export default function MonthlyChart() {
   }, []);
 
   useEffect(() => {
-    if (allData.length === 0 || !selectedYear) return;
+    if (allData.length === 0 || !selectedKomoditas) {
+        setChartData({ categories: [], data: [] });
+        return;
+    }
 
-    const filteredByYear = allData.filter((item: any) => 
-      String(item.tahun_panen || item.tahun) === selectedYear
-    );
+    // Filter berdasarkan komoditas yang dipilih (Kini wajib memilih spesifik komoditas)
+    const filteredData = allData.filter((item: any) => item.nama_komoditas?.trim() === selectedKomoditas);
 
     const aggregation: { [key: string]: number } = {};
 
-    filteredByYear.forEach((item: any) => {
-      const nama = item.nama_komoditas ? item.nama_komoditas.trim() : "Lainnya";
-      const rawProduksi = item.produksi;
+    filteredData.forEach((item: any) => {
+      const namaKecamatan = item.nama_kecamatan ? item.nama_kecamatan.trim() : "Lainnya";
+      const rawProduksi = item.produksi || item.hasil_prediksi; 
       let nilai = 0;
 
       if (typeof rawProduksi === 'string') {
@@ -69,33 +74,36 @@ export default function MonthlyChart() {
          nilai = Number(rawProduksi) || 0;
       }
 
-      if (nama) {
-        aggregation[nama] = (aggregation[nama] || 0) + nilai;
+      if (namaKecamatan) {
+        aggregation[namaKecamatan] = (aggregation[namaKecamatan] || 0) + nilai;
       }
     });
 
-    const keys = Object.keys(aggregation);
-    const values = Object.values(aggregation).map(val => Number(val.toFixed(2)));
+    // Urutkan dari tertinggi ke terendah
+    const sortedData = Object.entries(aggregation).sort((a, b) => b[1] - a[1]); 
+
+    const keys = sortedData.map(item => item[0]);
+    const values = sortedData.map(item => Number(item[1].toFixed(2)));
 
     setChartData({
       categories: keys,
       data: values
     });
 
-  }, [selectedYear, allData]);
+  }, [selectedKomoditas, allData]);
 
   const chartOptions: ApexOptions = {
-    colors: ["#198f3f"], 
+    colors: ["#3b82f6"], 
     chart: {
       fontFamily: "Outfit, sans-serif",
       type: "bar",
-      height: 260, // TINGGI DIKECILKAN
+      height: 420,
       toolbar: { show: false },
     },
     plotOptions: {
       bar: {
         horizontal: false, 
-        columnWidth: "50%",
+        columnWidth: "60%",
         borderRadius: 4,
         dataLabels: {
             position: 'top', 
@@ -121,11 +129,12 @@ export default function MonthlyChart() {
       axisTicks: { show: true },
       labels: {
         style: {
-            fontSize: '12px',
+            fontSize: '11px',
             fontWeight: 500,
         },
         rotate: -45, 
-        trim: false
+        trim: false,
+        hideOverlappingLabels: false 
       }
     },
     yaxis: {
@@ -150,12 +159,15 @@ export default function MonthlyChart() {
       y: {
         formatter: (val: number) => `${val.toLocaleString('id-ID')} Ton`,
       },
+      x: {
+          formatter: (val: string) => `Kecamatan: ${val}`
+      }
     },
   };
 
   const chartSeries = [
     {
-      name: "Total Produksi",
+      name: "Prediksi Produksi",
       data: chartData.data,
     },
   ];
@@ -166,22 +178,22 @@ export default function MonthlyChart() {
         
         <div>
             <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-            Statistik Komoditas
+            Prediksi Hasil Panen 2026
             </h3>
-            <p className="text-sm text-gray-500">Total produksi berdasarkan tahun panen</p>
+            <p className="text-sm text-gray-500">Estimasi produksi berdasarkan Kecamatan</p>
         </div>
 
         <div className="relative">
             <select 
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(e.target.value)}
-                className="appearance-none bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-32 p-2.5 pr-8 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white cursor-pointer"
-                disabled={isLoading}
+                value={selectedKomoditas}
+                onChange={(e) => setSelectedKomoditas(e.target.value)}
+                className="appearance-none bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-40 p-2.5 pr-8 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white cursor-pointer"
+                disabled={isLoading || komoditasOptions.length === 0}
             >
-                {yearOptions.map((year) => (
-                    <option key={year} value={year}>{year}</option>
+                {komoditasOptions.map((komoditas) => (
+                    <option key={komoditas} value={komoditas}>{komoditas}</option>
                 ))}
-                {yearOptions.length === 0 && <option disabled>No Data</option>}
+                {komoditasOptions.length === 0 && !isLoading && <option disabled>Tidak ada data</option>}
             </select>
             
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300">
@@ -193,19 +205,19 @@ export default function MonthlyChart() {
 
       <div className="w-full">
           {isLoading ? (
-             <div className="h-[260px] flex items-center justify-center text-gray-400 bg-gray-50 rounded-lg">
-                Loading Grafik...
+             <div className="h-[420px] flex items-center justify-center text-gray-400 bg-gray-50 rounded-lg">
+                Loading Data Prediksi 2026...
              </div>
           ) : chartData.categories.length > 0 ? (
             <ReactApexChart
                 options={chartOptions}
                 series={chartSeries}
                 type="bar"
-                height={260} /* TINGGI DIKECILKAN */
+                height={420} 
             />
           ) : (
-            <div className="h-[260px] flex items-center justify-center text-gray-400 bg-gray-50 rounded-lg">
-                Tidak ada data untuk tahun {selectedYear}
+            <div className="h-[420px] flex items-center justify-center text-gray-400 bg-gray-50 rounded-lg">
+                Data prediksi 2026 belum tersedia.
             </div>
           )}
       </div>

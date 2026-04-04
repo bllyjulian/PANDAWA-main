@@ -79,12 +79,15 @@ export const InfoPanel: React.FC<InfoPanelProps> = ({ pin, onClose, pinCategorie
                     <div className="mt-4 grid grid-cols-2 gap-4">
                         {/* Jumlah Penduduk */}
                         <div className="bg-gray-50 rounded-lg p-3 flex flex-col items-center shadow-sm">
-                            <svg className="w-6 h-6 text-orange-500 mb-2" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M13 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm-9 8a4 4 0 0 1 8 0H4Zm9 0a5.978 5.978 0 0 0-1.356-3.778A6.008 6.008 0 0 1 16 15h-3Z" />
-                            </svg>
-                            <p className="text-xs text-gray-500">Penduduk</p>
-                            <p className="text-sm font-medium text-gray-800">{pin.population?.toLocaleString() || "-"} Jiwa</p>
-                        </div>
+        <svg className="w-6 h-6 text-orange-500 mb-2" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M13 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm-9 8a4 4 0 0 1 8 0H4Zm9 0a5.978 5.978 0 0 0-1.356-3.778A6.008 6.008 0 0 1 16 15h-3Z" />
+        </svg>
+        <p className="text-xs text-gray-500">Penduduk</p>
+        {/* PERBAIKAN DISINI: ganti pin.population jadi pin.jml_penduduk */}
+        <p className="text-sm font-medium text-gray-800">
+        {pin.jml_penduduk || "-"} Jiwa
+        </p>
+    </div>
 
                         {/* Area */}
                         <div className="bg-gray-50 rounded-lg p-3 flex flex-col items-center shadow-sm">
@@ -97,12 +100,13 @@ export const InfoPanel: React.FC<InfoPanelProps> = ({ pin, onClose, pinCategorie
 
                         {/* Laju Pertumbuhan */}
                         <div className="bg-gray-50 rounded-lg p-3 flex flex-col items-center shadow-sm">
-                            <svg className="w-6 h-6 text-blue-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 17l6-6 4 4 8-8" />
-                            </svg>
-                            <p className="text-xs text-gray-500">Laju Pertumbuhan</p>
-                            <p className="text-sm font-medium text-gray-800">{pin.laju || "-"}</p>
-                        </div>
+        <svg className="w-6 h-6 text-blue-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 17l6-6 4 4 8-8" />
+        </svg>
+        <p className="text-xs text-gray-500">Laju Pertumbuhan</p>
+        {/* PERBAIKAN DISINI: ganti pin.laju jadi pin.laju_pertumbuhan */}
+        <p className="text-sm font-medium text-gray-800">{pin.laju_pertumbuhan || "-"}</p>
+    </div>
 
                         {/* Komoditas Tertinggi */}
                         <div className="bg-gray-50 rounded-lg p-3 flex flex-col items-center shadow-sm">

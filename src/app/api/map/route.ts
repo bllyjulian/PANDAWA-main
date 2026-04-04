@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(req: NextRequest) {
   try {
+    // HAPUS "WHERE hasil_panen.tahun_panen = 2025"
+    // Agar semua data tahun (2012-2025) terkirim ke frontend
     const [rows] = await db.query(`
       SELECT 
         hasil_panen.id_panen,
@@ -20,8 +22,8 @@ export async function GET(req: NextRequest) {
         data_kecamatan ON hasil_panen.id_kecamatan = data_kecamatan.id_kecamatan
       JOIN 
         komoditas ON hasil_panen.id_komoditas = komoditas.id_komoditas
-      WHERE 
-        hasil_panen.tahun_panen = 2025
+      ORDER BY 
+        hasil_panen.tahun_panen DESC
     `);
     
     return NextResponse.json(rows);

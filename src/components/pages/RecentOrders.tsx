@@ -1,3 +1,5 @@
+"use client";
+import { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -10,54 +12,66 @@ import Image from "next/image";
 
 // Define the TypeScript interface for the table rows
 interface Product {
-  id: number; // Unique identifier for each product
-  name: string; // Product name
-  // penduduk: string; // penduduk of the product
-  image: string; // URL or path to the product image
-  penduduk: number; // penduduk of the product
+  id: number;
+  name: string;
+  image: string;
+  penduduk: number;
 }
 
-// Define the table data using the interface
-const tableData: Product[] = [
-  {
-    id: 1,
-    name: "Bondowoso",
-    penduduk: 76.805,
-    image: "/kecamatan/bondowoso.jpg", // Replace with actual image URL
-  },
-  {
-    id: 2,
-    name: "Tlogosari",
-    penduduk: 47.078,
-    image: "/kecamatan/tlogosari.jpg", // Replace with actual image URL
-  },
-  {
-    id: 3,
-    name: "Cermee",
-    penduduk: 46.353,
-    image: "/kecamatan/cermee.jpg", // Replace with actual image URL
-  },
-  {
-    id: 4,
-    name: "Tenggarang",
-    penduduk: 43.973,
-    image: "/kecamatan/tenggarang.jpg", // Replace with actual image URL
-  },
-  {
-    id: 5,
-    name: "Maesan",
-    penduduk: 42.212,
-    image: "/kecamatan/maesan.jpg", // Replace with actual image URL
-  },
-];
-
 export default function RecentOrders() {
+  const [tableData, setTableData] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchTopPenduduk() {
+      try {
+        // Kita ambil data penduduk
+        const res = await fetch('/api/penduduk');
+        if (!res.ok) throw new Error("Gagal mengambil data");
+        
+        const rawData = await res.json();
+
+        // 1. Proses Data: Bersihkan angka & Sorting
+        // Kita butuh array temporary untuk sorting
+        const processedData = rawData.map((item: any) => {
+            // Bersihkan string angka (misal "12.500" -> 12500)
+            const cleanPop = String(item.jml_penduduk).replace(/\./g, '').replace(/,/g, '');
+            const popNumber = Number(cleanPop) || 0;
+
+            return {
+                id: item.id_penduduk,
+                name: item.nama_kecamatan,
+                penduduk: popNumber,
+                // Generate path gambar dinamis berdasarkan nama kecamatan
+                // Contoh: "Bondowoso" -> "/kecamatan/bondowoso.jpg"
+                image: `/kecamatan/${item.nama_kecamatan.toLowerCase().trim().replace(/\s+/g, '-')}.jpg`
+            };
+        });
+
+        // 2. Sort Descending (Terbesar ke Terkecil)
+        const sortedData = processedData.sort((a: any, b: any) => b.penduduk - a.penduduk);
+
+        // 3. Ambil Top 5
+        const top5 = sortedData.slice(0, 5);
+
+        setTableData(top5);
+
+      } catch (error) {
+        console.error("Error fetching top penduduk:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchTopPenduduk();
+  }, []);
+
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
       <div className="flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-            Penduduk Teratas
+            Penduduk Teratas (Top 5)
           </h3>
         </div>
       </div>
@@ -77,41 +91,60 @@ export default function RecentOrders() {
                 isHeader
                 className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
-                penduduk
+                Penduduk (Jiwa)
               </TableCell>
             </TableRow>
           </TableHeader>
 
           {/* Table Body */}
-
           <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
-            {tableData.map((product) => (
-              <TableRow key={product.id} className="">
-                <TableCell className="py-3">
-                  <div className="flex items-center gap-3">
-                    <div className="h-[50px] w-[50px] overflow-hidden rounded-md">
-                      <Image
-                        width={50}
-                        height={50}
-                        src={product.image}
-                        className="h-[50px] w-[50px]"
-                        alt={product.name}
-                      />
+            {isLoading ? (
+               <TableRow>
+                 <TableCell colSpan={2} className="py-3 text-center text-gray-500">
+                   Loading data...
+                 </TableCell>
+               </TableRow>
+            ) : tableData.length === 0 ? (
+                <TableRow>
+                 <TableCell colSpan={2} className="py-3 text-center text-gray-500">
+                   Belum ada data penduduk.
+                 </TableCell>
+               </TableRow>
+            ) : (
+                tableData.map((product) => (
+                <TableRow key={product.id} className="">
+                    <TableCell className="py-3">
+                    <div className="flex items-center gap-3">
+                        <div className="h-[50px] w-[50px] overflow-hidden rounded-md bg-gray-100">
+                        {/* Menggunakan Image dengan fallback error handling sederhana atau style object cover */}
+                        <Image
+                            width={50}
+                            height={50}
+                            src={product.image}
+                            className="h-[50px] w-[50px] object-cover"
+                            alt={product.name}
+                            // Fallback image jika gambar kecamatan tidak ditemukan (opsional)
+                            onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = "/images/logo/logo-icon-pandawa.png"; // Ganti dengan placeholder kamu
+                            }}
+                        />
+                        </div>
+                        <div>
+                        <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
+                            {product.name}
+                        </p>
+                        </div>
                     </div>
-                    <div>
-                      <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                        {product.name}
-                      </p>
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                  <Badge>
-                    {product.penduduk}
-                  </Badge>
-                </TableCell>
-              </TableRow>
-            ))}
+                    </TableCell>
+                    <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                    <Badge color="light">
+                        {product.penduduk.toLocaleString('id-ID')}
+                    </Badge>
+                    </TableCell>
+                </TableRow>
+                ))
+            )}
           </TableBody>
         </Table>
       </div>
