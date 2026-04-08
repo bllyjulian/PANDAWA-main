@@ -15,16 +15,22 @@ export default function PredictionChart() {
   });
   const [allData, setAllData] = useState<any[]>([]);
   const [komoditasOptions, setKomoditasOptions] = useState<string[]>([]); 
-  const [selectedKomoditas, setSelectedKomoditas] = useState<string>(""); // Dikosongkan dulu, nanti di-set saat fetch
+  const [selectedKomoditas, setSelectedKomoditas] = useState<string>(""); 
   const [isLoading, setIsLoading] = useState(true);
 
+  // Fetch Data
   useEffect(() => {
     async function fetchData() {
       try {
-        const res = await fetch('/api/komoditas'); 
+// Tambahkan cache: 'no-store' atau dummy parameter timestamp supaya tidak dibaca dari cache
+const res = await fetch(`/api/komoditas?t=${new Date().getTime()}`, { 
+  cache: 'no-store' 
+});
+
         if (!res.ok) throw new Error("Gagal mengambil data");
         
         const result = await res.json();
+        console.log("Data dari API:", result);
         
         if (Array.isArray(result)) {
           // Filter hanya tahun 2026
@@ -37,7 +43,7 @@ export default function PredictionChart() {
 
           setKomoditasOptions(komoditas);
           
-          // SET DEFAULT KOMODITAS KE ITEM PERTAMA (Misal: "Padi")
+          // Set default komoditas ke item pertama
           if (komoditas.length > 0) {
               setSelectedKomoditas(komoditas[0]);
           }
@@ -52,46 +58,62 @@ export default function PredictionChart() {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    if (allData.length === 0 || !selectedKomoditas) {
-        setChartData({ categories: [], data: [] });
-        return;
+  // Process and Sort Data
+// Process and Sort Data
+useEffect(() => {
+  if (allData.length === 0 || !selectedKomoditas) {
+      setChartData({ categories: [], data: [] });
+      return;
+  }
+
+  // 1. Filter berdasarkan komoditas yang dipilih
+  const filteredData = allData.filter((item: any) => item.nama_komoditas?.trim() === selectedKomoditas);
+
+  // 2. Agregasi total produksi per kecamatan ke dalam Object
+  const aggregation: { [key: string]: number } = {};
+
+  filteredData.forEach((item: any) => {
+    const namaKecamatan = item.nama_kecamatan ? item.nama_kecamatan.trim() : "Lainnya";
+    
+    // Pastikan properti yang diambil sesuai dengan respons API (produksi atau hasil_prediksi)
+    const rawProduksi = item.produksi || item.hasil_prediksi; 
+    let nilai = 0;
+
+    if (typeof rawProduksi === 'string') {
+       nilai = parseFloat(rawProduksi.replace(/\./g, '').replace(/,/g, '.')) || 0;
+    } else {
+       nilai = Number(rawProduksi) || 0;
     }
 
-    // Filter berdasarkan komoditas yang dipilih (Kini wajib memilih spesifik komoditas)
-    const filteredData = allData.filter((item: any) => item.nama_komoditas?.trim() === selectedKomoditas);
+    if (namaKecamatan) {
+      aggregation[namaKecamatan] = (aggregation[namaKecamatan] || 0) + nilai;
+    }
+  });
 
-    const aggregation: { [key: string]: number } = {};
+  // 3. Ubah object hasil agregasi menjadi array of objects agar bisa diurutkan dengan aman
+  const dataArray = Object.keys(aggregation).map(kecamatanKey => {
+    return {
+      kecamatan: kecamatanKey,
+      totalProduksi: aggregation[kecamatanKey]
+    };
+  });
 
-    filteredData.forEach((item: any) => {
-      const namaKecamatan = item.nama_kecamatan ? item.nama_kecamatan.trim() : "Lainnya";
-      const rawProduksi = item.produksi || item.hasil_prediksi; 
-      let nilai = 0;
+  // 4. Sort array tersebut dari yang TERBESAR ke TERKECIL berdasarkan nilai totalProduksi
+  dataArray.sort((a, b) => b.totalProduksi - a.totalProduksi);
 
-      if (typeof rawProduksi === 'string') {
-         nilai = parseFloat(rawProduksi.replace(/\./g, '').replace(/,/g, '.')) || 0;
-      } else {
-         nilai = Number(rawProduksi) || 0;
-      }
+  // 5. Pisahkan kembali menjadi array kategori dan data secara sinkron
+  const sortedCategories = dataArray.map(item => item.kecamatan);
+  const sortedValues = dataArray.map(item => Number(item.totalProduksi.toFixed(2)));
 
-      if (namaKecamatan) {
-        aggregation[namaKecamatan] = (aggregation[namaKecamatan] || 0) + nilai;
-      }
-    });
+  // 6. Masukkan ke dalam state chartData
+  setChartData({
+    categories: sortedCategories,
+    data: sortedValues
+  });
 
-    // Urutkan dari tertinggi ke terendah
-    const sortedData = Object.entries(aggregation).sort((a, b) => b[1] - a[1]); 
+}, [selectedKomoditas, allData]);
 
-    const keys = sortedData.map(item => item[0]);
-    const values = sortedData.map(item => Number(item[1].toFixed(2)));
-
-    setChartData({
-      categories: keys,
-      data: values
-    });
-
-  }, [selectedKomoditas, allData]);
-
+  // Chart Configuration
   const chartOptions: ApexOptions = {
     colors: ["#3b82f6"], 
     chart: {
